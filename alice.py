@@ -25,7 +25,7 @@ def aliceNode():
 
         #TODO: Can we avoid the next line? Maybe.
         # But I am getting inconsisten results if I do not re-initialise qA.
-        # If I do this, line 19's 'inplace' arg becomes technically useless.
+        # If I do this, line 20's 'inplace' arg becomes technically useless.
         qA = Alice.recvEPR()
         data = Alice.recvClassical()
         message = list(data)
