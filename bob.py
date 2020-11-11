@@ -29,7 +29,7 @@ def bobNode():
         print("-"*25)
 
         #Creating Bob's own qubit and
-        # controversially recreating EPR (Refer line 25 in Alice's code)
+        # controversially recreating EPR (Refer line 26 in Alice's code)
         qB = Bob.createEPR("Alice")
         q = qubit(Bob)
 
