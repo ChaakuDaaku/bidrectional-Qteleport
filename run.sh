@@ -1,2 +1,2 @@
-python alice.py &
-python bob.py
+python alice.py $1 &
+python bob.py $1

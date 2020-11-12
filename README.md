@@ -4,5 +4,5 @@ Implementing bi-directional quantum teleportation using CQC-Python and Simulaqro
 
 ### To run the code
 ```
-sh run.sh
+sh run.sh <num_shots>
 ```

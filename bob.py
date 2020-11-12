@@ -1,52 +1,54 @@
+import sys
 from cqc.pythonLib import qubit, CQCConnection
 
 def bobNode():
+    
+    shots = int(sys.argv[1])
+    states = { "BRecv": [], "BSent": [] }
 
-    with CQCConnection("Bob") as Bob:
+    for i in range(shots):
 
-        #Receving Alice's EPR
-        qB = Bob.recvEPR()
+        with CQCConnection("Bob") as Bob:
 
-        data = Bob.recvClassical()
-        message = list(data)
+            #Receving Alice's EPR
+            qB = Bob.recvEPR()
 
-        a = message[0]
-        b = message[1]
+            data = Bob.recvClassical()
+            message = list(data)
 
-        if b == 1:
-            qB.X()
-        if a == 1:
-            qB.Z()
+            a = message[0]
+            b = message[1]
 
-        m = qB.measure(inplace=True) #Similar to Alice's retention of qA.
-        print("Bob: Measurement outcomes of A->B is: {}".format(m))
-        print("-"*50+"\n\n")
+            if b == 1:
+                qB.X()
+            if a == 1:
+                qB.Z()
 
-        #Just flipping the previous outcome for fun
-        n = 2**m - 1
+            m = qB.measure()
+            states["BRecv"].append(m)
 
-        print("||   Now, Bob will send a message to Alice   ||")
-        print("-"*25)
+            #Just flipping the previous outcome for fun
+            n = 2**m - 1
 
-        #Creating Bob's own qubit and
-        # controversially recreating EPR (Refer line 26 in Alice's code)
-        qB = Bob.createEPR("Alice")
-        q = qubit(Bob)
+            #Creating Bob's own qubit and EPR
+            qB = Bob.createEPR("Alice")
+            q = qubit(Bob)
 
-        #Using the flipped outcome
-        if n:
-            q.X()
+            #Using the flipped outcome
+            if n:
+                q.X()
 
-        q.H()
-        q.cnot(qB)
-        q.H()
+            q.H()
+            q.cnot(qB)
+            q.H()
 
-        c = q.measure()
-        d = qB.measure()
+            c = q.measure()
+            d = qB.measure()
+            
+            states["BSent"].append(c)
+            Bob.sendClassical("Alice", [c, d])  
 
-        print("Bob: Measurement outcomes of B->A are: c={}, d={} \n\n".format(c, d))
-
-        Bob.sendClassical("Alice", [c, d])
+    print("B's Node:", states)
 
 
 if __name__ == "__main__":

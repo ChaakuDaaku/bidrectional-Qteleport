@@ -1,46 +1,47 @@
-from cqc.pythonLib import qubit, CQCConnection
+import sys
+from cqc.pythonLib import qubit, CQCConnection, CQCMix
 
 def aliceNode():
 
-    with CQCConnection("Alice") as Alice:
+    shots = int(sys.argv[1])
+    states = { "ASent": [], "ARecv": [] }
 
-        print("||   First Alice sends a message to Bob  ||")
-        print("-"*25)
+    for i in range(shots):
 
-        #Creating EPR and Alice's qubit
-        qA = Alice.createEPR("Bob")
-        q = qubit(Alice)
+        with CQCConnection("Alice") as Alice:
 
-        #Teleportation operation
-        q.H()
-        q.cnot(qA)
-        q.H()
+            #Creating EPR and Alice's qubit
+            qA = Alice.createEPR("Bob")
+            q = qubit(Alice)
 
-        a = q.measure()
-        b = qA.measure(inplace=True) #I don't want to destroy the qubit after measurement
+            #Teleportation operation
+            q.H()
+            q.cnot(qA)
+            q.H()
 
-        print("Alice: Measurement outcomes of A->B are: a={}, b={} \n\n".format(a, b))
+            a = q.measure()
+            b = qA.measure() #I don't want to destroy the qubit after measurement
 
-        Alice.sendClassical("Bob", [a, b])
+            states["ASent"].append(a)
+            Alice.sendClassical("Bob", [a, b])
 
-        #TODO: Can we avoid the next line? Maybe.
-        # But I am getting inconsisten results if I do not re-initialise qA.
-        # If I do this, line 20's 'inplace' arg becomes technically useless.
-        qA = Alice.recvEPR()
-        data = Alice.recvClassical()
-        message = list(data)
+            qA = Alice.recvEPR()
+            data = Alice.recvClassical()
+            message = list(data)
 
-        c = message[0]
-        d = message[1]
+            c = message[0]
+            d = message[1]
 
-        if d == 1:
-            qA.X()
-        if c == 1:
-            qA.Z()
-    
-        m = qA.measure()
-        print("Alice: Measurement outcomes of B->A is: {}".format(m))
-        print("-"*50)
+            if d == 1:
+                qA.X()
+            if c == 1:
+                qA.Z()
+        
+            m = qA.measure()
+
+            states["ARecv"].append(m)
+
+    print("A's Node:", states)
 
 
 if __name__ == "__main__":
